@@ -1,0 +1,5 @@
+ "Python is a programming language",
+    "Java is used for backend development",
+    "Embeddings convert text into vectors",
+    "AI helps machines understand language",
+    "Django is a Python web framework"
