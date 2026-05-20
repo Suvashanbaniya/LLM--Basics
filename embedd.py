@@ -17,5 +17,5 @@ data = respones.json()
 embedding = data["embedding"]
 
 print("Frist 10 embedding numbers:\n")
-
+    
 print(embedding[:10])
