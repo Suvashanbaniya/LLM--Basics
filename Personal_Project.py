@@ -1,6 +1,7 @@
+
 import requests,json
 
-from sklearn.metrics.pairwise import cosine_similarity
+
 
 llm_url = "http://localhost:11434/api/generate"
 embed_url = "http://localhost:11434/api/embeddings"
@@ -9,30 +10,44 @@ temperature = 0.5
 
 def get_embedding(text):
     response = requests.post(embed_url,json={
-        "model":"nomic=embed-text",
+        "model":"nomic-embed-text",
         "prompt":text,
     })
     
     data = response.json()
-    return data ['embedding']
+    return data['embedding']
+
 def load_data():
     try:
         with open('family_data.json','r') as f:
             return json.load(f)
         
     except FileNotFoundError:
-        return{}
+        return {}
     
-    def save_data ():
-        with open("family_data.json",'w') as f:
-            json.dump(data,f,indent=2)
+
+# FIXED:
+# Added parameter "data"
+def save_data(data):
+    
+    with open("family_data.json",'w') as f:
+        json.dump(data,f,indent=2)
+
+
 family_data = load_data()            
     
 knowledge_embedding = []
-for item in family_data:
+
+for item in family_data.keys():
+
     if item.strip(): 
+        
         emb = get_embedding(item) 
-        knowledge_embedding.append(item)  
+        
+        knowledge_embedding.append({
+            "text":item,
+            "embedding":emb
+        })
         
 print("Knowledge Ready")   
 
@@ -42,115 +57,166 @@ messages = [{
     'context':'helpful bot',
 }]     
     
+
 name = input("Enter the name :")
 
+
+def get_intent(user):
+    prompt = f"""
+    You are intent classifier.
+    Classify the message into :
+    - casual_chat 
+    -family_question
+    -add_information
+    
+    Message:
+    {user}
+    Return only one word 
+    
+    """
+    
+    response = requests.post(llm_url,json={
+        "model":"llama3",
+        "prompt":prompt,
+        "stream":False
+    })
+    
+    result = response.json()
+    return result["response"].strip().lower().replace(" ","_")
+
 while True :
+    
+    
     user = input(f"{name} :")
     
     if user.lower()== 'exit':
         break
-        
-    found = False
-    answer = None
     
-    for key , value in family_data.items():
-        if key.lower() in user.lower():
-            answer = value
-            found = True
-            break
-    if found :
-        print("AI:",answer)
-    else:
-        print("AI: I dont have answer to the question")
-        print("AI: Please provide it so I can remember it .")
-        
-        new_info = input("Enter info you want to add : ")
-        
-        parts = new_info.split()
-        
-        if len(parts) >=3 :
-            key = parts[0]
-            name = parts[1]
-            age = parts[2]
-            
-            
-            family_data[key] = {
-                "name":name,
-                "age":age
-            }     
-            save_data(family_data)
-            print("AI: The information that you gave is saved into the database")   
-        
-    if user.lower() == 'info':
-        print("This is the LLM project created by suvashan Baniya \n")
-        print("This chatbot will show you the data of your family member as you store the data into the database"\
-            "The current available information available right is just some random text")
+    intent = get_intent(user)
+    print("Debug Intent:",intent)
+    
+    if intent =="casual_chat":
+        print("AI: Hey how can we help you ?")
         continue
+    
+    elif intent  == "family_question":
+        found = False
+        for key , value in family_data.items():
+            if key.lower() in user.lower():
+                print("AI:",value)
+                found = True
+                break
+        if not found :
+            print("AI: Unable to recognize the family member")
         
+        continue
     
-    
-    {json.dumps(family_data, indent=2)}
-    
-    
-    data = {
-        'model':'llama3',
-        'prompt':prompt,
-        'stream':False,
-    }
-    
-    response = requests.post(embed_url,json=data)
-    result  = response.json()
-    print("\nAI:", result["response"])
+    elif intent == "add_information":
+       new_info = input("Enter the information you want to add :")
+       parts = new_info.split()
+       
+       if len(parts) >= 3 :
+           key = parts[0]
+           person_name = parts[1]
+           age = parts[2]
+           
+           family_data[key] = {
+               "name" : person_name,
+               "age" : age,
+              }
+           save_data(family_data)
+           print("AI : Saved successfully")
+           
+       continue
+        
     
     history = ""
+    
     for msg in messages:
+        
         history += (
             f"{msg['role']}:"
             f"{msg['context']}:\n"
         )
 
 
-prompt = f"""
-    You are a  Family assistant AI.
-    Answer only using the family data 
+    prompt = f"""
+    You are a Family assistant AI.
+    
+    Answer only using the family data.
+    
+    Family Data:
+    
+    {json.dumps(family_data, indent=2)}
     
     Conversation history:
+    
     {history}
     
-    Current User Question
+    Current User Question:
+    
     {user}
     
-    Answer naturally
+    Answer naturally.
+    """
     
     
-
-"""        
-
-response = requests.post(llm_url,json={
-    'model':'llama3',
-    'prompt':prompt,
-    'stream':True,
+    data = {
+        'model':'llama3',
+        'prompt':prompt,
+        'stream':True,
+    }
     
-},flush=True)
+    
+    # FIXED:
+    # You were using embed_url instead of llm_url
+    
+    response = requests.post(
+        llm_url,
+        json=data,
+        stream=True
+    )
+    
 
-print("AI:",end="",flush=True)
+    print("\nAI:",end="",flush=True)
+    
+    ai_reply = ""
 
-ai_reply = ""
-
-try :
-    for line in response.iter_lines():
-        if line :
-            chunk = line.decode('utf-8')
-            data = json.loads(chunk)
-            token = data.get("response",(""))
+    
+    try :
+        
+        for line in response.iter_lines():
             
-            print(token,end="",flush=True)
-            ai_reply += token
-            
-    print()
-    messages.append({
-        'role':'user',
-        'system':user
-    })
-except Exception as e :
-    print("Error",e )    
+            if line :
+                
+                chunk = line.decode('utf-8')
+                
+                data = json.loads(chunk)
+                
+                token = data.get("response","")
+                
+                print(token,end="",flush=True)
+                
+                ai_reply += token
+                
+        print()
+
+        
+        # FIXED:
+        # Changed system -> context
+        
+        messages.append({
+            'role':'user',
+            'context':user
+        })
+
+        messages.append({
+            'role':'assistant',
+            'context':ai_reply
+        })
+
+        
+    except Exception as e :
+        
+        print("Error",e)
+

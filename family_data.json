@@ -4,12 +4,10 @@
       "great_grandfather": {
         "name": "Dev Bahadur Baniya"
       },
-
       "great_grandmother": {
         "name": "Unknown"
       }
     },
-
     "grandparents": {
       "grandfather": {
         "name": "Keshav Baniya",
@@ -18,22 +16,18 @@
         "occupation": "Police Constable - Tikabhairav",
         "birth_place": "Seraphat, Chhampi, Lalitpur",
         "rasi": "Kumba",
-
         "brothers": [
           "Udav Baniya",
           "Uday Baniya",
           "Sodhev Baniya"
         ],
-
         "spouse": "Muiya Baniya",
-
         "children": [
           "Jeevan Baniya",
           "Ramesh Baniya",
           "Saraswati Baniya"
         ]
       },
-
       "grandmother": {
         "name": "Muiya Baniya",
         "birth_year": 1925,
@@ -41,7 +35,6 @@
         "occupation": "House Wife",
         "birth_place": "Lele, Lalitpur",
         "rasi": "Makkar",
-
         "children": [
           "Jeevan Baniya",
           "Ramesh Baniya",
@@ -49,14 +42,12 @@
         ]
       }
     },
-
     "parents_generation": {
       "father": {
         "name": "Jeevan Baniya",
         "birth_year": 1973,
         "birth_place": "Seraphat, Chhampi, Lalitpur",
         "spouse": "Muiya Khadka Baniya",
-
         "siblings": [
           {
             "name": "Ramesh Baniya",
@@ -66,7 +57,6 @@
               "Anita Baniya"
             ]
           },
-
           {
             "name": "Saraswati Baniya",
             "relation": "Sister",
@@ -76,17 +66,14 @@
             ]
           }
         ],
-
         "children": [
           "Suvashan Baniya",
           "Suman Baniya"
         ]
       },
-
       "mother": {
         "name": "Muiya Khadka Baniya",
         "birth_place": "Kathmandu",
-
         "siblings": [
           {
             "name": "Rita Khadka",
@@ -95,7 +82,6 @@
               "Aayush Khadka"
             ]
           },
-
           {
             "name": "Bikash Khadka",
             "relation": "Brother",
@@ -105,12 +91,15 @@
             ]
           }
         ],
-
         "children": [
           "Suvashan Baniya",
           "Suman Baniya"
         ]
       }
     }
+  },
+  "he": {
+    "name": "is",
+    "age": "hero"
   }
 }
